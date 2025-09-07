@@ -93,7 +93,7 @@ Especially getting the proper value for gain requires some effort.
 ### hx71x_io.power_down()
 
 Set the load cell to sleep mode. power_down() and power_up() are only
-working with the hx71x_gpio variant of the driver.
+working with the hx71x_gpio and hx71x_pio variants of the driver.
 
 ### hx71x_io.power_up()
 
