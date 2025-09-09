@@ -27,7 +27,6 @@ class HX71X:
         self.OFFSET = 0
         self.SCALE = 1
         self.time_constant = 0.25
-        self.filtered = 0
 
         # set aliases for the HX71X_IO methods
         self.read = self.hx71x_io_obj.read
@@ -35,17 +34,19 @@ class HX71X:
         self.calibrate = self.hx71x_io_obj.calibrate
         self.power_down = self.hx71x_io_obj.power_down
         self.power_up = self.hx71x_io_obj.power_up
+        self.set_mode = self.hx71x_io_obj.set_mode
+
+        self.setup_lowpass()
 
     def __call__(self):
         return self.read()
 
-    def set_mode(self, mode):
-        self.hx71x_io_obj.set_mode(mode)
-        self.filtered = self.read()
-
     def read_lowpass(self):
         self.filtered += self.time_constant * (self.read() - self.filtered)
         return self.filtered
+
+    def setup_lowpass(self):
+        self.filtered = self.read()
 
     def set_time_constant(self, time_constant = None):
         if time_constant is None:

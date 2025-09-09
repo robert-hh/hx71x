@@ -105,17 +105,13 @@ than usual to finish.
 ## Methods of the HX71X class
 
 ### result = hx71x.read()
+### hx71x_set_mode(mode)
 ### hx71x.temperature([raw=False])
 ### hx71x.calibrate(ref_temp [, gain=20.4])
 ### hx71x.power_down()
 ### hx71x.power_up()
 
 Aliases for the HX71X_IO class methods.
-
-### hx71x.set_mode(mode)
-
-Sets the gain. For argument values see hx71x_io.set_mode(). It also sets
-the start value for hx71x.read_lowpass.
 
 ### result = hx71x.read_average(times=3)
 
@@ -126,8 +122,14 @@ raw value.
 
 Returns the actual value of the load cell fed through an one stage IIR lowpass
 filter. The properties of the filter can be set with set_time_constant().
-When using hx71x.read_lowpass(), first call hx71x.set_mode() to change
-the mode. That will set the new start value for hx71x.read_lowpass().
+When starting to use hx71x.read_lowpass() after a large change of the input
+quantity or change of the ADC mode, it's advisable to first
+call hx71x.setup_lowpass(). That will set the new start value for
+hx71x.read_lowpass().
+
+### setup_lowpass()
+
+Restart the lowpass filter with the actual value of the ADC.
 
 ### rh = hx71x.set_time_constant(value=None)
 
