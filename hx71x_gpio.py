@@ -104,7 +104,7 @@ class HX71X_IO:
         mode = self.MODE
         self.MODE = 2
         self.read()  # switch to temperature mode
-        temp = self.read()  # read the temperature
+        temp = self.read() >> 9 # read the temperature and scale it down
         self.MODE = mode
         self.read()  # switch the mode back
         if raw:
