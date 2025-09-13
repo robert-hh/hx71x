@@ -30,10 +30,6 @@ class HX71X_IO:
         self.data = data
         self.clock.value(False)
 
-        self.temp_offset = 0
-        self.temp_gain = 20.4
-        self.temp_ref = 0.0
-
         # create the state machine
         self.sm = rp2.StateMachine(state_machine, self.hx71x_pio, freq=1_000_000,
                                    sideset_base=self.clock, in_base=self.data,
@@ -105,23 +101,6 @@ class HX71X_IO:
             result -= 0x1000000
 
         return result
-
-    def temperature(self, raw=False):
-        mode = self.MODE
-        self.MODE = 2
-        self.read()  # switch to temperature mode
-        temp = self.read() >> 9 # read the temperature and scale it down
-        self.MODE = mode
-        self.read()  # switch the mode back
-        if raw:
-            return temp
-        else:
-            return (temp - self.temp_offset) / self.temp_gain + self.temp_ref
-
-    def calibrate(self, ref_temp, gain=20.4):
-        self.temp_ref = ref_temp
-        self.temp_gain = gain
-        self.temp_offset = self.temperature(True)
 
     def power_down(self):
         self.sm.restart()  # Just in case that it is not at the start.
