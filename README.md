@@ -144,7 +144,7 @@ Determine the tare value of the load cell by averaging `times` raw readings.
 ### temperature = hx71x.temperature[raw=False])
 
 Return the value of the internal temperature sensor. In order to get a °C value,
-the sensor has to be calibrated first by calling hx71x_io.calibrate(). When `raw`
+the sensor has to be calibrated first by calling hx71x.calibrate(). When `raw`
 is set to True, the raw reading us returned.
 The temperature() method returns meaningful values only for the HX710A device.
 Besides that, do not expect precision.
@@ -157,7 +157,43 @@ value is 20.4. Offset is the ADC value offset. When omitted, the actual ADC
 reading is used as offset. This option can be used, if ref_temp is the actual
 temperature of the sensor. The values for gain and offset vary per device.
 Especially getting the proper value for gain requires some effort.
-At some sample devices the gain values were close to the default of 20.4.
+
+## Temperature calibration method
+
+In order to get reasonably temperature reading, you have to know a triple
+of reference_temperature `ref_temp`, `gain` and `offset` at the reference_temperature.
+Gain and offset are different for each device. To obtain these values, you can follow
+this approach. You need a known good thermometer and some device to achieve
+different temperature, like an oven or a fridge.
+
+### Get the reference temperature
+
+Put the HX71X and the thermometer at the same place at temperature t1,
+power up the HX710A an let is settle for a few minutes. Get raw temperature
+readings from the HX710A using hx71x.temperature(True) until the values
+you get are stable. A variation of +/- 1 is fine. Then take a reading `t1` from the
+thermometer, which gives you the `ref_temp` value, and note the raw temperature
+`t_raw1` returned by the HX710A with hx71x.temperature(True), which will
+be used as `offset` for HX710A.calibrate().
+
+### Get a second reading at a different temperature
+
+Then expose the HX710A and the thermometer to a different temperature `t2`.
+Whether higher or lower does not matter. It must be suitable for both
+the thermometer and the HX710A and not too small. Let the devices settle
+for a while and then take again a reading from the thermometer as `t2`,
+and from the HX710A the raw temperature as `t_raw2`.
+
+### Determine gain
+
+Then you can determine `gain` as (t_raw2 - t_raw1)/(t2 - t1).
+
+When using the temperature reading of the HX710A later, you can calibrate it with the
+data triple t_ref, gain and offset.
+
+At some sample devices the gain values were 19.7 and 18.7. So in a +/- 10°C
+range around the reference temperature the error would be small when using the
+default gain of 20.4.
 
 ## Examples
 
@@ -253,7 +289,7 @@ pin_OUT = Pin("P9", Pin.IN, pull=Pin.PULL_DOWN)
 pin_SCK = Pin("P10", Pin.OUT)
 
 spi = SPI(0, mode=SPI.MASTER, baudrate=1000000, polarity=0,
-             phase=0, pins=(None, pin_SCK, pin_OUT))
+             phase=1, pins=(None, pin_SCK, pin_OUT))
 
 hxc = HX71X_IO(pin_OUT, spi)
 hx71x = HX71X(hxc)
@@ -281,7 +317,7 @@ pin_SCK = Pin(13, Pin.OUT)
 spi_SCK = Pin(14)
 
 spi = SPI(1, baudrate=1000000, polarity=0,
-          phase=0, sck=spi_SCK, mosi=pin_SCK, miso=pin_OUT)
+          phase=1, sck=spi_SCK, mosi=pin_SCK, miso=pin_OUT)
 
 hxc = HX71X_IO(SCK, pin_OUT, spi)
 hx71x = HX71X(hxc)
